@@ -10,6 +10,24 @@ package frc.robot
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
+import com.kauailabs.navx.frc.AHRS
+import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import com.revrobotics.ColorSensorV3
+import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
+import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
+import edu.wpi.first.wpilibj.XboxController.Button.*
+import edu.wpi.first.wpilibj.drive.DifferentialDrive
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.button.*
+import frc.robot.commands.*
+import frc.robot.subsystems.*
+import frc.robot.triggers.EndgameTrigger
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -18,54 +36,33 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
  * project.
  */
 class Robot : TimedRobot() {
-    lateinit var m_autonomousCommand: Command
-
-    lateinit var m_robotContainer: RobotContainer
+        /* controller0 - secondary driver controller */
+        val controller0 = XboxController(1)
+        /* controller1 - primary driver controller (overriden by controller0) */
+        val controller1 = XboxController(0)
+    
+        /** --- setup drivetrain --- **/
+        val motorFrontLeft = WPI_TalonSRX(Constants.kDrivetrainFrontLeftPort)
+        val motorBackLeft = WPI_TalonSRX(Constants.kDrivetrainBackLeftPort)
+        val motorFrontRight = WPI_TalonSRX(Constants.kDrivetrainFrontRightPort)
+        val motorBackRight = WPI_TalonSRX(Constants.kDrivetrainBackRightPort)
+    
+    
+        /* keep speeds same on motors on each side */
+        val motorsLeft = SpeedControllerGroup(motorFrontLeft, motorBackLeft)
+        val motorsRight = SpeedControllerGroup(motorFrontRight, motorBackRight)
+    
+        val visionToggle = VisionToggleSubsystem()
+    
+        val gyro = AHRS()
+        val leftDrivetrainEncoder = Encoder(Constants.leftDrivetrainEncoderPortA, Constants.leftDrivetrainEncoderPortB, Constants.kDrivetrainEncoderAReversed)
+        val rightDrivetrainencoder = Encoder(Constants.rightDrivetrainEncoderPortA, Constants.rightDrivetrainEncoderPortB, Constants.kDrivetrainEncoderBReversed)
 
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
      */
     override fun robotInit() {
-        // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        // autonomous chooser on the dashboard.
-        m_robotContainer = RobotContainer()
-        // Automatically grab auto command to ensure m_autonomousCommand is defined before teleopInit is run
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand()
-    }
-
-    /**
-     * This function is called every robot packet, no matter the mode. Use this for items like
-     * diagnostics that you want ran during disabled, autonomous, teleoperated and test.
-     *
-     * <p>This runs after the mode specific periodic functions, but before
-     * LiveWindow and SmartDashboard integrated updating.
-     */
-    override fun robotPeriodic() {
-        // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-        // commands, running already-scheduled commands, removing finished or interrupted commands,
-        // and running subsystem periodic() methods.  This must be called from the robot's periodic
-        // block in order for anything in the Command-based framework to work.
-        CommandScheduler.getInstance().run()
-    }
-
-    /**
-     * This function is called once each time the robot enters Disabled mode.
-     */
-    override fun disabledInit() {
-    }
-
-    override fun disabledPeriodic() {
-    }
-
-    /**
-     * This autonomous runs the autonomous command selected by your {@link RobotContainer} class.
-     */
-    override fun autonomousInit() {
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand()
-
-        // schedule the autonomous command (example)
-        m_autonomousCommand.let { m_autonomousCommand.schedule() }
     }
 
     /**
@@ -74,28 +71,9 @@ class Robot : TimedRobot() {
     override fun autonomousPeriodic() {
     }
 
-    override fun teleopInit() {
-        // This makes sure that the autonomous stops running when
-        // teleop starts running. If you want the autonomous to
-        // continue until interrupted by another command, remove
-        // this line or comment it out.
-        m_autonomousCommand.let { m_autonomousCommand.cancel() }
-    }
-
     /**
      * This function is called periodically during operator control.
      */
     override fun teleopPeriodic() {
-    }
-
-    override fun testInit() {
-        // Cancels all running commands at the start of test mode.
-        CommandScheduler.getInstance().cancelAll()
-    }
-
-    /**
-     * This function is called periodically during test mode.
-     */
-    override fun testPeriodic() {
     }
 }
