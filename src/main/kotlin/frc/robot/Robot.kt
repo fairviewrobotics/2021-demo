@@ -75,5 +75,7 @@ class Robot : TimedRobot() {
      * This function is called periodically during operator control.
      */
     override fun teleopPeriodic() {
+        motorsLeft.set(0.5);
+        motorsRight.set(-0.5);
     }
 }
